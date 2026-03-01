@@ -1,0 +1,8 @@
+node_modules/
+*.mbtiles
+*.osm.pbf
+*.log
+*.exe
+*.pdb
+.claude/
+public/data/

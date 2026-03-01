@@ -1,0 +1,16 @@
+{
+  "name": "mapserver",
+  "version": "1.0.0",
+  "description": "OpenStreetMap tile server with IE11-compatible map viewer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning server.js",
+    "dev": "nodemon --exec \"node --no-warnings=ExperimentalWarning\" server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

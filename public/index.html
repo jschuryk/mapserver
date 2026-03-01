@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #map { height: 100%; background: #e8f0d8; }
+    .map-label {
+      white-space: nowrap;
+      font-family: Arial, sans-serif;
+      pointer-events: none;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      position: relative;
+      text-shadow:
+        1px  1px 0 #fff,
+       -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+       -1px  1px 0 #fff;
+    }
+    .map-label.province    { font-size: 11px; color: #666; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+    .map-label.capital     { font-size: 11px; color: #222; font-weight: bold; }
+    .map-label.city        { font-size: 10px; color: #333; }
+  </style>
+  <script>
+    if (typeof Object.assign !== 'function') {
+      Object.assign = function (target) {
+        for (var i = 1; i < arguments.length; i++) {
+          var source = arguments[i];
+          if (source) {
+            for (var key in source) {
+              if (Object.prototype.hasOwnProperty.call(source, key)) {
+                target[key] = source[key];
+              }
+            }
+          }
+        }
+        return target;
+      };
+    }
+  </script>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
+  <script>
+    var map = L.map('map').setView([56.0, -96.0], 4);
+
+    function roadStyle(properties) {
+      var c = properties.class;
+      if (c === 'motorway')  return { color: '#e892a2', weight: 4, opacity: 1 };
+      if (c === 'trunk')     return { color: '#f9b29c', weight: 3, opacity: 1 };
+      if (c === 'primary')   return { color: '#fcd6a4', weight: 3, opacity: 1 };
+      if (c === 'secondary') return { color: '#f7fabf', weight: 2, opacity: 1 };
+      if (c === 'tertiary')  return { color: '#ffffff', weight: 2, opacity: 1 };
+      if (c === 'minor')     return { color: '#ffffff', weight: 1.5, opacity: 1 };
+      if (c === 'path')      return { color: '#fa8072', weight: 0.5, opacity: 1 };
+      return { color: '#bbbbbb', weight: 1, opacity: 1 };
+    }
+
+    L.vectorGrid.protobuf('/tiles/{z}/{x}/{y}.pbf?v=2', {
+      rendererFactory: L.canvas.tile,
+      maxZoom: 10,
+      minZoom: 2,
+      updateWhenZooming: false,
+      keepBuffer: 4,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      vectorTileLayerStyles: {
+        water: {
+          fill: true, fillColor: '#aad3df', fillOpacity: 1, weight: 0
+        },
+        waterway: function (properties) {
+          var c = properties.class;
+          if (c === 'river' || c === 'canal') {
+            return { color: '#aad3df', weight: 1.5, opacity: 1 };
+          }
+          return { weight: 0, opacity: 0, fill: false };
+        },
+        transportation: roadStyle,
+        transportation_name: { weight: 0, fill: false },
+        building: {
+          fill: true, fillColor: '#d9d0c9', fillOpacity: 1,
+          color: '#cfc6be', weight: 0.5
+        },
+        place: { weight: 0, fill: false },
+        poi:   { weight: 0, fill: false }
+      }
+    }).addTo(map);
+
+    // -----------------------------------------------------------------------
+    // Province / territory name labels (hardcoded centroids, shown at zoom 4+)
+    // -----------------------------------------------------------------------
+    var provinces = [
+      { lat: 54.5, lng: -125.0, name: 'British Columbia', minZoom: 4 },
+      { lat: 55.0, lng: -115.0, name: 'Alberta',          minZoom: 4 },
+      { lat: 54.5, lng: -106.5, name: 'Saskatchewan',     minZoom: 4 },
+      { lat: 54.0, lng:  -97.5, name: 'Manitoba',         minZoom: 4 },
+      { lat: 50.5, lng:  -85.5, name: 'Ontario',          minZoom: 4 },
+      { lat: 52.5, lng:  -70.5, name: 'Québec',           minZoom: 4 },
+      { lat: 46.5, lng:  -66.5, name: 'New Brunswick',    minZoom: 5 },
+      { lat: 45.2, lng:  -63.2, name: 'Nova Scotia',      minZoom: 6 },
+      { lat: 46.3, lng:  -63.2, name: 'P.E.I.',           minZoom: 7 },
+      { lat: 54.0, lng:  -60.0, name: 'Newfoundland\n& Labrador', minZoom: 4 },
+      { lat: 63.5, lng: -135.5, name: 'Yukon',            minZoom: 4 },
+      { lat: 65.5, lng: -120.0, name: 'Northwest\nTerritories',  minZoom: 4 },
+      { lat: 70.5, lng:  -87.0, name: 'Nunavut',          minZoom: 4 }
+    ];
+
+    // -----------------------------------------------------------------------
+    // Major city / capital labels
+    // type: 'capital' (Ottawa + provincial capitals) or 'city'
+    // -----------------------------------------------------------------------
+    var cities = [
+      // National capital
+      { lat: 45.4215, lng:  -75.6972, name: 'Ottawa',        type: 'capital', minZoom: 4 },
+      // Provincial / territorial capitals
+      { lat: 48.4284, lng: -123.3656, name: 'Victoria',      type: 'capital', minZoom: 6 },
+      { lat: 53.5461, lng: -113.4938, name: 'Edmonton',      type: 'capital', minZoom: 5 },
+      { lat: 50.4452, lng: -104.6189, name: 'Regina',        type: 'capital', minZoom: 5 },
+      { lat: 49.8951, lng:  -97.1384, name: 'Winnipeg',      type: 'capital', minZoom: 5 },
+      { lat: 43.6532, lng:  -79.3832, name: 'Toronto',       type: 'capital', minZoom: 5 },
+      { lat: 46.8139, lng:  -71.2080, name: 'Québec City',   type: 'capital', minZoom: 5 },
+      { lat: 45.9636, lng:  -66.6431, name: 'Fredericton',   type: 'capital', minZoom: 6 },
+      { lat: 44.6488, lng:  -63.5752, name: 'Halifax',       type: 'capital', minZoom: 6 },
+      { lat: 46.2382, lng:  -63.1311, name: 'Charlottetown', type: 'capital', minZoom: 7 },
+      { lat: 47.5615, lng:  -52.7126, name: "St. John's",    type: 'capital', minZoom: 6 },
+      { lat: 60.7212, lng: -135.0568, name: 'Whitehorse',    type: 'capital', minZoom: 5 },
+      { lat: 62.4540, lng: -114.3718, name: 'Yellowknife',   type: 'capital', minZoom: 5 },
+      { lat: 63.7467, lng:  -68.5170, name: 'Iqaluit',       type: 'capital', minZoom: 6 },
+      // Major cities
+      { lat: 49.2827, lng: -123.1207, name: 'Vancouver',     type: 'city', minZoom: 5 },
+      { lat: 51.0447, lng: -114.0719, name: 'Calgary',       type: 'city', minZoom: 5 },
+      { lat: 52.1579, lng: -106.6702, name: 'Saskatoon',     type: 'city', minZoom: 6 },
+      { lat: 45.5017, lng:  -73.5673, name: 'Montréal',      type: 'city', minZoom: 5 },
+      { lat: 43.2557, lng:  -79.8711, name: 'Hamilton',      type: 'city', minZoom: 7 },
+      { lat: 42.9849, lng:  -81.2453, name: 'London',        type: 'city', minZoom: 7 },
+      { lat: 43.4516, lng:  -80.4925, name: 'Kitchener',     type: 'city', minZoom: 8 },
+      { lat: 44.3894, lng:  -79.6903, name: 'Barrie',        type: 'city', minZoom: 8 },
+      { lat: 46.0878, lng:  -64.7782, name: 'Moncton',       type: 'city', minZoom: 7 },
+      { lat: 45.2733, lng:  -66.0633, name: 'Saint John',    type: 'city', minZoom: 7 },
+      { lat: 53.9171, lng: -122.7497, name: 'Prince George', type: 'city', minZoom: 7 },
+      { lat: 48.3809, lng:  -89.2477, name: 'Thunder Bay',   type: 'city', minZoom: 7 },
+      { lat: 46.4917, lng:  -80.9930, name: 'Sudbury',       type: 'city', minZoom: 7 },
+      { lat: 49.8880, lng: -119.4960, name: 'Kelowna',       type: 'city', minZoom: 8 },
+      { lat: 50.6745, lng: -120.3273, name: 'Kamloops',      type: 'city', minZoom: 8 },
+      { lat: 56.7265, lng: -111.3803, name: 'Fort McMurray', type: 'city', minZoom: 8 },
+      { lat: 52.2681, lng: -113.8112, name: 'Red Deer',      type: 'city', minZoom: 8 },
+      { lat: 49.6966, lng: -112.8450, name: 'Lethbridge',    type: 'city', minZoom: 8 },
+      { lat: 49.8483, lng:  -99.9500, name: 'Brandon',       type: 'city', minZoom: 8 },
+      { lat: 45.4042, lng:  -71.8929, name: 'Sherbrooke',    type: 'city', minZoom: 8 },
+      { lat: 45.8772, lng:  -72.4851, name: 'Drummondville', type: 'city', minZoom: 9 },
+      { lat: 46.3432, lng:  -72.5453, name: 'Trois-Rivières',type: 'city', minZoom: 8 },
+      { lat: 48.4284, lng:  -71.0605, name: 'Saguenay',      type: 'city', minZoom: 8 }
+    ];
+
+    function makeLabel(lat, lng, html, cssClass, minZoom) {
+      return {
+        marker: L.marker([lat, lng], {
+          icon: L.divIcon({
+            html: '<div class="map-label ' + cssClass + '">' + html + '</div>',
+            className: '',
+            iconSize: [0, 0],
+            iconAnchor: [0, 0]
+          }),
+          interactive: false
+        }),
+        minZoom: minZoom
+      };
+    }
+
+    var labels = [];
+
+    var i, p, c;
+    for (i = 0; i < provinces.length; i++) {
+      p = provinces[i];
+      labels.push(makeLabel(
+        p.lat, p.lng,
+        p.name.replace('\n', '<br>'),
+        'province',
+        p.minZoom
+      ));
+    }
+    for (i = 0; i < cities.length; i++) {
+      c = cities[i];
+      labels.push(makeLabel(c.lat, c.lng, c.name, c.type, c.minZoom));
+    }
+
+    function updateLabels() {
+      var zoom = map.getZoom();
+      var j, lbl;
+      for (j = 0; j < labels.length; j++) {
+        lbl = labels[j];
+        if (zoom >= lbl.minZoom) {
+          if (!map.hasLayer(lbl.marker)) { map.addLayer(lbl.marker); }
+        } else {
+          if (map.hasLayer(lbl.marker)) { map.removeLayer(lbl.marker); }
+        }
+      }
+    }
+
+    map.on('zoomend', updateLabels);
+    updateLabels();
+
+    // -----------------------------------------------------------------------
+    // Province boundary lines
+    // Loaded from /data/provinces.geojson if present.
+    // Download the file from Natural Earth (ne_10m_admin_1_states_provinces),
+    // filter to Canada, and save to public/data/provinces.geojson.
+    // -----------------------------------------------------------------------
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/data/provinces.geojson');
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) { return; }
+      if (xhr.status !== 200) { return; }
+      var data;
+      try { data = JSON.parse(xhr.responseText); } catch (e) { return; }
+      L.geoJSON(data, {
+        style: {
+          color: '#888',
+          weight: 1,
+          fillOpacity: 0,
+          opacity: 0.8
+        }
+      }).addTo(map);
+    };
+    xhr.send();
+  </script>
+</body>
+</html>
