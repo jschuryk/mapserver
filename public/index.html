@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     html, body { height: 100%; margin: 0; padding: 0; }
-    #map { height: 100%; background: #cccccc; }
+    #map { height: 100%; background: #9ab4bc; }
     #zoom-display {
       position: absolute; bottom: 24px; left: 8px; z-index: 1000;
       background: rgba(255,255,255,0.7); padding: 2px 6px;
@@ -57,6 +57,10 @@
   <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
   <script>
     var map = L.map('map').setView([56.0, -96.0], 4);
+
+    // Land pane sits below the tile pane (z=200) so ocean background shows through
+    map.createPane('landPane');
+    map.getPane('landPane').style.zIndex = 150;
 
     function roadStyle(properties) {
       var c = properties.class;
@@ -228,6 +232,25 @@
       };
       xhr.send();
     }
+
+    // Land polygons — rendered below tiles so blue ocean background shows through
+    function loadLand(url) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) { return; }
+        if (xhr.status !== 200) { return; }
+        var data;
+        try { data = JSON.parse(xhr.responseText); } catch (e) { return; }
+        L.geoJSON(data, {
+          pane: 'landPane',
+          style: { fillColor: '#cccccc', fillOpacity: 1, weight: 0 }
+        }).addTo(map);
+      };
+      xhr.send();
+    }
+
+    loadLand('/data/land.geojson');
 
     // State/province borders — subtle gray
     loadGeoJSON('/data/provinces.geojson', {

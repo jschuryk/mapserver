@@ -34,6 +34,17 @@ download('ne_10m_admin_1_states_provinces.geojson', function (err, raw) {
   console.log('Wrote provinces.geojson (' + geojson.features.length + ' features)');
 });
 
+// Land polygons — 50m resolution, world (used as base layer so ocean shows through)
+download('ne_50m_land.geojson', function (err, raw) {
+  if (err) { console.error(err); process.exit(1); }
+  var geojson = JSON.parse(raw);
+  // Strip all properties — we only need the geometry for rendering
+  geojson.features.forEach(function (f) { f.properties = {}; });
+  var out = path.join(__dirname, 'public', 'data', 'land.geojson');
+  fs.writeFileSync(out, JSON.stringify(geojson));
+  console.log('Wrote land.geojson (' + geojson.features.length + ' features)');
+});
+
 // National boundaries — filter by ISO_A3
 download('ne_10m_admin_0_countries.geojson', function (err, raw) {
   if (err) { console.error(err); process.exit(1); }
