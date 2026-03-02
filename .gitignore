@@ -5,4 +5,4 @@ node_modules/
 *.exe
 *.pdb
 .claude/
-public/data/
+public/data/*.mbtiles
