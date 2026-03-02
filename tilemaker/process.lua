@@ -58,20 +58,17 @@ function way_function()
   local natural  = Find("natural")
   local name     = Find("name")
 
-  -- Roads and paths
+  -- Roads — only major roads (motorway, trunk, primary)
   if highway ~= "" then
-    -- Normalize link roads and paths to their parent class
     local class = highway
-    if highway == "motorway_link"                then class = "motorway"   end
-    if highway == "trunk_link"                   then class = "trunk"      end
-    if highway == "primary_link"                 then class = "primary"    end
-    if highway == "secondary_link"               then class = "secondary"  end
-    if highway == "tertiary_link"                then class = "tertiary"   end
-    if highway == "unclassified" or
-       highway == "residential"                  then class = "minor"      end
-    if highway == "path"     or highway == "footway"   or
-       highway == "cycleway" or highway == "steps"     or
-       highway == "bridleway"                    then class = "path"       end
+    if highway == "motorway_link" then class = "motorway" end
+    if highway == "trunk_link"    then class = "trunk"    end
+    if highway == "primary_link"  then class = "primary"  end
+
+    -- Skip everything below primary
+    if class ~= "motorway" and class ~= "trunk" and class ~= "primary" then
+      return
+    end
 
     Layer("transportation", false)
     Attribute("class", class)
@@ -84,9 +81,8 @@ function way_function()
     return
   end
 
-  -- Waterways (rivers, canals, streams — linear)
-  if waterway == "river"  or waterway == "canal" or
-     waterway == "stream" or waterway == "drain" then
+  -- Waterways — named rivers and canals only (unnamed minor waterways omitted)
+  if (waterway == "river" or waterway == "canal") and name ~= "" then
     Layer("waterway", false)
     Attribute("class", waterway)
   end

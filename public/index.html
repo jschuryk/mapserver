@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     html, body { height: 100%; margin: 0; padding: 0; }
-    #map { height: 100%; background: #e8f0d8; }
+    #map { height: 100%; background: #cccccc; }
     .map-label {
       white-space: nowrap;
       font-family: Arial, sans-serif;
@@ -17,13 +17,13 @@
       transform: translate(-50%, -50%);
       position: relative;
       text-shadow:
-        1px  1px 0 #fff,
-       -1px -1px 0 #fff,
-        1px -1px 0 #fff,
-       -1px  1px 0 #fff;
+        1px  1px 0 #ccc,
+       -1px -1px 0 #ccc,
+        1px -1px 0 #ccc,
+       -1px  1px 0 #ccc;
     }
-    .map-label.province    { font-size: 11px; color: #666; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
-    .map-label.capital     { font-size: 11px; color: #222; font-weight: bold; }
+    .map-label.province    { font-size: 11px; color: #444; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+    .map-label.capital     { font-size: 11px; color: #111; font-weight: bold; }
     .map-label.city        { font-size: 10px; color: #333; }
   </style>
   <script>
@@ -53,40 +53,31 @@
 
     function roadStyle(properties) {
       var c = properties.class;
-      if (c === 'motorway')  return { color: '#e892a2', weight: 4, opacity: 1 };
-      if (c === 'trunk')     return { color: '#f9b29c', weight: 3, opacity: 1 };
-      if (c === 'primary')   return { color: '#fcd6a4', weight: 3, opacity: 1 };
-      if (c === 'secondary') return { color: '#f7fabf', weight: 2, opacity: 1 };
-      if (c === 'tertiary')  return { color: '#ffffff', weight: 2, opacity: 1 };
-      if (c === 'minor')     return { color: '#ffffff', weight: 1.5, opacity: 1 };
-      if (c === 'path')      return { color: '#fa8072', weight: 0.5, opacity: 1 };
-      return { color: '#bbbbbb', weight: 1, opacity: 1 };
+      // ASM-style: grayscale hierarchy, weight carries more meaning than colour
+      if (c === 'motorway') return { color: '#585858', weight: 3.5, opacity: 1 };
+      if (c === 'trunk')    return { color: '#767676', weight: 2.5, opacity: 1 };
+      if (c === 'primary')  return { color: '#989898', weight: 2,   opacity: 1 };
+      return { color: '#b0b0b0', weight: 1, opacity: 0.8 };
     }
 
-    L.vectorGrid.protobuf('/tiles/{z}/{x}/{y}.pbf?v=2', {
+    L.vectorGrid.protobuf('/tiles/{z}/{x}/{y}.pbf?v=6', {
       rendererFactory: L.canvas.tile,
       maxZoom: 10,
-      minZoom: 2,
+      minZoom: 4,
       updateWhenZooming: false,
       keepBuffer: 4,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       vectorTileLayerStyles: {
+        // Water: low-saturation blue-gray
         water: {
-          fill: true, fillColor: '#aad3df', fillOpacity: 1, weight: 0
+          fill: true, fillColor: '#9ab4bc', fillOpacity: 1, weight: 0
         },
-        waterway: function (properties) {
-          var c = properties.class;
-          if (c === 'river' || c === 'canal') {
-            return { color: '#aad3df', weight: 1.5, opacity: 1 };
-          }
-          return { weight: 0, opacity: 0, fill: false };
+        // Waterways: slightly deeper blue-gray stroke
+        waterway: {
+          color: '#7a9ea8', weight: 1.5, opacity: 0.85
         },
         transportation: roadStyle,
         transportation_name: { weight: 0, fill: false },
-        building: {
-          fill: true, fillColor: '#d9d0c9', fillOpacity: 1,
-          color: '#cfc6be', weight: 0.5
-        },
         place: { weight: 0, fill: false },
         poi:   { weight: 0, fill: false }
       }
@@ -221,10 +212,10 @@
       try { data = JSON.parse(xhr.responseText); } catch (e) { return; }
       L.geoJSON(data, {
         style: {
-          color: '#888',
+          color: '#7a7a7a',
           weight: 1,
           fillOpacity: 0,
-          opacity: 0.8
+          opacity: 0.6
         }
       }).addTo(map);
     };
