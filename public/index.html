@@ -57,8 +57,9 @@
   <script src="lib/leaflet.js"></script>
   <script src="lib/Leaflet.VectorGrid.bundled.js"></script>
   <script>
-    // Set SERVER to your map server address when using this file locally.
-    // Leave empty ('') to use relative URLs (normal when served from the server itself).
+    // Set SERVER to the map server address when using this file locally (e.g. 'http://192.168.1.10:3000').
+    // Leave empty ('') when this file is served directly from the map server.
+    // Note: data files (GeoJSON) are always loaded from relative paths — copy the data/ folder alongside this file.
     var SERVER = '';
 
     var map = L.map('map').setView([56.0, -96.0], 4);
@@ -432,15 +433,15 @@
       xhr.send();
     }
 
-    loadLand(SERVER + '/data/land.geojson');
+    loadLand('data/land.geojson');
 
     // State/province borders — subtle gray
-    loadGeoJSON(SERVER + '/data/provinces.geojson', {
+    loadGeoJSON('data/provinces.geojson', {
       color: '#7a7a7a', weight: 0.75, fillOpacity: 0, opacity: 0.6
     });
 
     // National borders — slightly heavier and darker
-    loadGeoJSON(SERVER + '/data/countries.geojson', {
+    loadGeoJSON('data/countries.geojson', {
       color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7
     });
 
@@ -530,7 +531,7 @@
       xhr.send();
     }
 
-    loadPipeline(SERVER + '/data/pipeline.geojson');
+    loadPipeline('data/pipeline.geojson');
   </script>
 </body>
 </html>
