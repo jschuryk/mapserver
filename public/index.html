@@ -56,6 +56,10 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
   <script>
+    // Set SERVER to your map server address when using this file locally.
+    // Leave empty ('') to use relative URLs (normal when served from the server itself).
+    var SERVER = '';
+
     var map = L.map('map').setView([56.0, -96.0], 4);
 
     // Land pane sits below the tile pane (z=200) so ocean background shows through
@@ -73,7 +77,7 @@
       return { color: '#cccccc', weight: 1, opacity: 0.8 };
     }
 
-    L.vectorGrid.protobuf('/tiles/{z}/{x}/{y}.pbf?v=6', {
+    L.vectorGrid.protobuf(SERVER + '/tiles/{z}/{x}/{y}.pbf?v=6', {
       rendererFactory: L.canvas.tile,
       maxZoom: 10,
       minZoom: 4,
@@ -427,15 +431,15 @@
       xhr.send();
     }
 
-    loadLand('/data/land.geojson');
+    loadLand(SERVER + '/data/land.geojson');
 
     // State/province borders — subtle gray
-    loadGeoJSON('/data/provinces.geojson', {
+    loadGeoJSON(SERVER + '/data/provinces.geojson', {
       color: '#7a7a7a', weight: 0.75, fillOpacity: 0, opacity: 0.6
     });
 
     // National borders — slightly heavier and darker
-    loadGeoJSON('/data/countries.geojson', {
+    loadGeoJSON(SERVER + '/data/countries.geojson', {
       color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7
     });
 
@@ -525,7 +529,7 @@
       xhr.send();
     }
 
-    loadPipeline('/data/pipeline.geojson');
+    loadPipeline(SERVER + '/data/pipeline.geojson');
   </script>
 </body>
 </html>
