@@ -6,3 +6,4 @@ node_modules/
 *.pdb
 .claude/
 public/data/*.mbtiles
+public/data/*.js
