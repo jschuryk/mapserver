@@ -5,25 +5,30 @@
     "tiles": {
       "type": "vector",
       "url": "mbtiles://{tiles}"
+    },
+    "land": {
+      "type": "geojson",
+      "data": "http://localhost:3000/data/land.geojson"
     }
   },
   "layers": [
     {
       "id": "background",
       "type": "background",
-      "paint": {
-        "background-color": "#b8b8b8"
-      }
+      "paint": { "background-color": "#9ab4bc" }
+    },
+    {
+      "id": "land-fill",
+      "type": "fill",
+      "source": "land",
+      "paint": { "fill-color": "#b8b8b8", "fill-opacity": 1 }
     },
     {
       "id": "water-fill",
       "type": "fill",
       "source": "tiles",
       "source-layer": "water",
-      "paint": {
-        "fill-color": "#9ab4bc",
-        "fill-opacity": 1
-      }
+      "paint": { "fill-color": "#9ab4bc", "fill-opacity": 1 }
     },
     {
       "id": "waterway-line",
@@ -33,10 +38,7 @@
       "minzoom": 8,
       "paint": {
         "line-color": "#7a9ea8",
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          8, 1,
-          10, 2
-        ]
+        "line-width": ["interpolate", ["linear"], ["zoom"], 8, 1, 10, 2]
       }
     },
     {
@@ -46,14 +48,10 @@
       "source-layer": "transportation",
       "filter": ["==", "class", "primary"],
       "minzoom": 7,
+      "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#a8a8a8",
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          7, 3.5,
-          10, 5
-        ],
-        "line-cap": "round",
-        "line-join": "round"
+        "line-width": ["interpolate", ["linear"], ["zoom"], 7, 3.5, 10, 5]
       }
     },
     {
@@ -63,14 +61,10 @@
       "source-layer": "transportation",
       "filter": ["==", "class", "trunk"],
       "minzoom": 6,
+      "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#909090",
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          6, 4,
-          10, 6.5
-        ],
-        "line-cap": "round",
-        "line-join": "round"
+        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 4, 10, 6.5]
       }
     },
     {
@@ -80,14 +74,10 @@
       "source-layer": "transportation",
       "filter": ["==", "class", "motorway"],
       "minzoom": 5,
+      "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#787878",
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          5, 4.5,
-          10, 8
-        ],
-        "line-cap": "round",
-        "line-join": "round"
+        "line-width": ["interpolate", ["linear"], ["zoom"], 5, 4.5, 10, 8]
       }
     },
     {
@@ -97,14 +87,10 @@
       "source-layer": "transportation",
       "filter": ["==", "class", "primary"],
       "minzoom": 7,
+      "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#d0d0d0",
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          7, 2,
-          10, 3.5
-        ],
-        "line-cap": "round",
-        "line-join": "round"
+        "line-width": ["interpolate", ["linear"], ["zoom"], 7, 2, 10, 3.5]
       }
     },
     {
@@ -114,14 +100,10 @@
       "source-layer": "transportation",
       "filter": ["==", "class", "trunk"],
       "minzoom": 6,
+      "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#c8c8c8",
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          6, 2.5,
-          10, 4.5
-        ],
-        "line-cap": "round",
-        "line-join": "round"
+        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 2.5, 10, 4.5]
       }
     },
     {
@@ -131,14 +113,10 @@
       "source-layer": "transportation",
       "filter": ["==", "class", "motorway"],
       "minzoom": 5,
+      "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#b8b8b8",
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          5, 3,
-          10, 6
-        ],
-        "line-cap": "round",
-        "line-join": "round"
+        "line-width": ["interpolate", ["linear"], ["zoom"], 5, 3, 10, 6]
       }
     }
   ]
