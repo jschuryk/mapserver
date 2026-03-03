@@ -40,18 +40,47 @@ app.use(function (req, res, next) {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Proxy PNG tile requests to TileServer GL.
+// In-memory PNG tile cache. Keyed by "z/x/y", values are Buffers.
+// FIFO eviction via Map insertion order when cap is reached.
+var tileCache = new Map();
+var TILE_CACHE_CAP = 10000;
+
+function cachePut(key, buf) {
+  if (tileCache.size >= TILE_CACHE_CAP) {
+    tileCache.delete(tileCache.keys().next().value);
+  }
+  tileCache.set(key, buf);
+}
+
+// Proxy PNG tile requests to TileServer GL, with in-memory cache.
 // Client requests /tiles/{z}/{x}/{y}.png — TileServer GL renders and returns PNG.
 app.get('/tiles/:z/:x/:y.png', function (req, res) {
+  var key = req.params.z + '/' + req.params.x + '/' + req.params.y;
+  var cached = tileCache.get(key);
+  if (cached) {
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('X-Tile-Cache', 'HIT');
+    return res.end(cached);
+  }
+
   var tilePath = '/styles/basic/' + req.params.z + '/' + req.params.x + '/' + req.params.y + '.png';
   var proxyReq = http.get({ hostname: 'localhost', port: TSGL_PORT, path: tilePath }, function (tileRes) {
     if (tileRes.statusCode !== 200) {
       return res.status(204).end();
     }
-    res.set('Content-Type', 'image/png');
-    res.set('Cache-Control', 'public, max-age=86400');
-    res.set('Access-Control-Allow-Origin', '*');
-    tileRes.pipe(res);
+    var chunks = [];
+    tileRes.on('data', function (chunk) { chunks.push(chunk); });
+    tileRes.on('end', function () {
+      var buf = Buffer.concat(chunks);
+      cachePut(key, buf);
+      res.set('Content-Type', 'image/png');
+      res.set('Cache-Control', 'public, max-age=86400');
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('X-Tile-Cache', 'MISS');
+      res.end(buf);
+    });
   });
   proxyReq.on('error', function () {
     res.status(503).end();
