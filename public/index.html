@@ -422,8 +422,28 @@
           }),
           interactive: false
         }),
-        minZoom: minZoom
+        minZoom: minZoom,
+        cssClass: cssClass
       };
+    }
+
+    function getLabelFontSize(cssClass, zoom) {
+      if (cssClass === 'province') {
+        if (zoom <= 5) return '11px';
+        if (zoom <= 7) return '12px';
+        return '13px';
+      }
+      if (cssClass === 'capital') {
+        if (zoom <= 5) return '11px';
+        if (zoom <= 7) return '12px';
+        if (zoom <= 9) return '13px';
+        return '14px';
+      }
+      // city
+      if (zoom <= 6) return '10px';
+      if (zoom <= 7) return '11px';
+      if (zoom <= 8) return '12px';
+      return '13px';
     }
 
     var labels = [];
@@ -445,11 +465,16 @@
 
     function updateLabels() {
       var zoom = map.getZoom();
-      var j, lbl;
+      var j, lbl, el, inner;
       for (j = 0; j < labels.length; j++) {
         lbl = labels[j];
         if (zoom >= lbl.minZoom) {
           if (!map.hasLayer(lbl.marker)) { map.addLayer(lbl.marker); }
+          el = lbl.marker.getElement();
+          if (el) {
+            inner = el.querySelector('.map-label');
+            if (inner) { inner.style.fontSize = getLabelFontSize(lbl.cssClass, zoom); }
+          }
         } else {
           if (map.hasLayer(lbl.marker)) { map.removeLayer(lbl.marker); }
         }
