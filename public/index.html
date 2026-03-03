@@ -428,35 +428,41 @@
       head.appendChild(s);
     }
 
-    // Land polygons — rendered below tiles so blue ocean background shows through.
-    // Canvas renderer used instead of SVG — SVG creates a DOM element per polygon
-    // vertex which is prohibitive for 1420 world land polygons in IE11.
-    loadScript(SERVER + '/data/land.js', function () {
-      if (typeof LAND_DATA === 'undefined') { return; }
-      L.geoJSON(LAND_DATA, {
-        pane: 'landPane',
-        renderer: L.canvas({ pane: 'landPane' }),
-        style: { fillColor: '#b8b8b8', fillOpacity: 1, weight: 0 }
-      }).addTo(map);
-    });
+    // IE11 (32-bit process, ~1.6GB memory ceiling): skip GeoJSON polygon layers
+    // entirely — Leaflet stores all coordinate arrays in JS heap regardless of
+    // renderer, and complex polygon data + tile parsing exceeds IE11's budget.
+    // Use land-gray CSS background instead; ocean loses distinction but map is functional.
+    if (isIE11) {
+      document.getElementById('map').style.background = '#b8b8b8';
+    } else {
+      // Land polygons — rendered below tiles so blue ocean background shows through.
+      loadScript(SERVER + '/data/land.js', function () {
+        if (typeof LAND_DATA === 'undefined') { return; }
+        L.geoJSON(LAND_DATA, {
+          pane: 'landPane',
+          renderer: L.canvas({ pane: 'landPane' }),
+          style: { fillColor: '#b8b8b8', fillOpacity: 1, weight: 0 }
+        }).addTo(map);
+      });
 
-    // State/province borders — subtle gray
-    loadScript(SERVER + '/data/provinces.js', function () {
-      if (typeof PROVINCES_DATA === 'undefined') { return; }
-      L.geoJSON(PROVINCES_DATA, {
-        renderer: L.canvas(),
-        style: { color: '#7a7a7a', weight: 0.75, fillOpacity: 0, opacity: 0.6 }
-      }).addTo(map);
-    });
+      // State/province borders — subtle gray
+      loadScript(SERVER + '/data/provinces.js', function () {
+        if (typeof PROVINCES_DATA === 'undefined') { return; }
+        L.geoJSON(PROVINCES_DATA, {
+          renderer: L.canvas(),
+          style: { color: '#7a7a7a', weight: 0.75, fillOpacity: 0, opacity: 0.6 }
+        }).addTo(map);
+      });
 
-    // National borders — slightly heavier and darker
-    loadScript(SERVER + '/data/countries.js', function () {
-      if (typeof COUNTRIES_DATA === 'undefined') { return; }
-      L.geoJSON(COUNTRIES_DATA, {
-        renderer: L.canvas(),
-        style: { color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7 }
-      }).addTo(map);
-    });
+      // National borders — slightly heavier and darker
+      loadScript(SERVER + '/data/countries.js', function () {
+        if (typeof COUNTRIES_DATA === 'undefined') { return; }
+        L.geoJSON(COUNTRIES_DATA, {
+          renderer: L.canvas(),
+          style: { color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7 }
+        }).addTo(map);
+      });
+    }
 
     // -----------------------------------------------------------------------
     // Pipeline layer — Pacific Heights Pipeline (Edmonton to Burnaby)
