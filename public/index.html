@@ -62,7 +62,12 @@
     // Note: data files (GeoJSON) are always loaded from relative paths — copy the data/ folder alongside this file.
     var SERVER = '';
 
-    var map = L.map('map').setView([56.0, -96.0], 4);
+    // IE11 detection — caps maxZoom to 8 to stay within IE11's memory budget.
+    // window.MSInputMethodContext is IE11-only; document.documentMode rules out Edge.
+    var isIE11 = !!(window.MSInputMethodContext) && !!(document.documentMode);
+    var effectiveMaxZoom = isIE11 ? 8 : 10;
+
+    var map = L.map('map', { maxZoom: effectiveMaxZoom }).setView([56.0, -96.0], 4);
 
     // Land pane sits below the tile pane (z=200) so ocean background shows through
     map.createPane('landPane');
@@ -81,7 +86,7 @@
 
     L.vectorGrid.protobuf(SERVER + '/tiles/{z}/{x}/{y}.pbf?v=6', {
       rendererFactory: L.canvas.tile,
-      maxZoom: 10,
+      maxZoom: effectiveMaxZoom,
       minZoom: 4,
       updateWhenZooming: false,
       updateWhenIdle: true,
@@ -423,11 +428,14 @@
       head.appendChild(s);
     }
 
-    // Land polygons — rendered below tiles so blue ocean background shows through
+    // Land polygons — rendered below tiles so blue ocean background shows through.
+    // Canvas renderer used instead of SVG — SVG creates a DOM element per polygon
+    // vertex which is prohibitive for 1420 world land polygons in IE11.
     loadScript(SERVER + '/data/land.js', function () {
       if (typeof LAND_DATA === 'undefined') { return; }
       L.geoJSON(LAND_DATA, {
         pane: 'landPane',
+        renderer: L.canvas({ pane: 'landPane' }),
         style: { fillColor: '#b8b8b8', fillOpacity: 1, weight: 0 }
       }).addTo(map);
     });
@@ -436,6 +444,7 @@
     loadScript(SERVER + '/data/provinces.js', function () {
       if (typeof PROVINCES_DATA === 'undefined') { return; }
       L.geoJSON(PROVINCES_DATA, {
+        renderer: L.canvas(),
         style: { color: '#7a7a7a', weight: 0.75, fillOpacity: 0, opacity: 0.6 }
       }).addTo(map);
     });
@@ -444,6 +453,7 @@
     loadScript(SERVER + '/data/countries.js', function () {
       if (typeof COUNTRIES_DATA === 'undefined') { return; }
       L.geoJSON(COUNTRIES_DATA, {
+        renderer: L.canvas(),
         style: { color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7 }
       }).addTo(map);
     });

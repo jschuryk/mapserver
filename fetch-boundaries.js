@@ -34,11 +34,26 @@ download('ne_50m_admin_1_states_provinces.geojson', function (err, raw) {
   console.log('Wrote provinces.geojson (' + geojson.features.length + ' features)');
 });
 
-// Land polygons — 50m resolution, world (used as base layer so ocean shows through)
+// Land polygons — 50m resolution, clipped to North America bounding box.
+// Filtering from 1420 world features to ~50 NA features saves significant memory in IE11.
 download('ne_50m_land.geojson', function (err, raw) {
   if (err) { console.error(err); process.exit(1); }
   var geojson = JSON.parse(raw);
-  // Strip all properties — we only need the geometry for rendering
+  // Keep only features that have at least one coordinate within the NA bbox
+  var W = -172, E = -50, S = 10, N = 85;
+  geojson.features = geojson.features.filter(function (f) {
+    var geom = f.geometry;
+    var polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+    for (var p = 0; p < polys.length; p++) {
+      var ring = polys[p][0];
+      for (var i = 0; i < ring.length; i++) {
+        if (ring[i][0] >= W && ring[i][0] <= E && ring[i][1] >= S && ring[i][1] <= N) {
+          return true;
+        }
+      }
+    }
+    return false;
+  });
   geojson.features.forEach(function (f) { f.properties = {}; });
   var out = path.join(__dirname, 'public', 'data', 'land.geojson');
   fs.writeFileSync(out, JSON.stringify(geojson));
