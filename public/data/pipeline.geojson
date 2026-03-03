@@ -1,0 +1,176 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-113.49, 53.55],
+          [-113.90, 53.38],
+          [-114.20, 53.25],
+          [-114.92, 53.22],
+          [-114.95, 52.88],
+          [-114.90, 52.37],
+          [-115.30, 52.05],
+          [-115.80, 51.98],
+          [-116.30, 51.90],
+          [-116.50, 51.87],
+          [-116.70, 51.70],
+          [-116.90, 51.45],
+          [-117.05, 51.30],
+          [-117.50, 51.18],
+          [-117.85, 51.02],
+          [-118.20, 51.00],
+          [-118.55, 50.92],
+          [-118.90, 50.83],
+          [-119.40, 50.75],
+          [-120.00, 50.68],
+          [-120.33, 50.67],
+          [-120.65, 50.40],
+          [-120.80, 50.10],
+          [-120.88, 49.85],
+          [-121.10, 49.60],
+          [-121.45, 49.38],
+          [-121.70, 49.25],
+          [-121.95, 49.15],
+          [-122.30, 49.05],
+          [-122.50, 49.08],
+          [-122.75, 49.15],
+          [-122.98, 49.25]
+        ]
+      },
+      "properties": {
+        "type": "pipeline_line",
+        "name": "Pacific Heights Pipeline",
+        "product": "Crude Oil",
+        "diameter_mm": 914
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-113.49, 53.55] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "refinery",
+        "name": "Edmonton Heartland Refinery",
+        "pressure_kpa": 8500,
+        "temperature_c": 52,
+        "flow_rate_m3h": 1200
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-114.92, 53.22] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "pumping_station",
+        "name": "Drayton Valley Pump Station",
+        "pressure_kpa": 4200,
+        "outlet_pressure_kpa": 8800,
+        "temperature_c": 49,
+        "flow_rate_m3h": 1196
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-114.90, 52.37] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "main_line_valve",
+        "name": "Rocky Mountain House MLV",
+        "pressure_kpa": 5500,
+        "temperature_c": 46,
+        "flow_rate_m3h": 1196
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-116.50, 51.87] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "pumping_station",
+        "name": "Saskatchewan Crossing Pump Station",
+        "pressure_kpa": 3800,
+        "outlet_pressure_kpa": 9200,
+        "temperature_c": 43,
+        "flow_rate_m3h": 1191
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-117.05, 51.30] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "main_line_valve",
+        "name": "Columbia Valley MLV",
+        "pressure_kpa": 6100,
+        "temperature_c": 41,
+        "flow_rate_m3h": 1191
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-118.20, 51.00] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "pumping_station",
+        "name": "Revelstoke Pump Station",
+        "pressure_kpa": 3200,
+        "outlet_pressure_kpa": 8400,
+        "temperature_c": 42,
+        "flow_rate_m3h": 1186
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-120.33, 50.67] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "pumping_station",
+        "name": "Kamloops Pump Station",
+        "pressure_kpa": 3500,
+        "outlet_pressure_kpa": 8600,
+        "temperature_c": 44,
+        "flow_rate_m3h": 1181
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-121.45, 49.38] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "main_line_valve",
+        "name": "Hope MLV",
+        "pressure_kpa": 5800,
+        "temperature_c": 43,
+        "flow_rate_m3h": 1181
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-122.30, 49.05] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "pumping_station",
+        "name": "Abbotsford Pump Station",
+        "pressure_kpa": 3100,
+        "outlet_pressure_kpa": 7200,
+        "temperature_c": 44,
+        "flow_rate_m3h": 1177
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-122.98, 49.25] },
+      "properties": {
+        "type": "pipeline_node",
+        "node_type": "terminal",
+        "name": "Burnaby Marine Terminal",
+        "pressure_kpa": 1500,
+        "temperature_c": 45,
+        "flow_rate_m3h": 1177
+      }
+    }
+  ]
+}

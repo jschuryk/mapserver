@@ -438,6 +438,94 @@
     loadGeoJSON('/data/countries.geojson', {
       color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7
     });
+
+    // -----------------------------------------------------------------------
+    // Pipeline layer — Pacific Heights Pipeline (Edmonton to Burnaby)
+    // -----------------------------------------------------------------------
+    var PIPELINE_ICONS = {
+      refinery: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><polygon points="14,2 24,8 24,20 14,26 4,20 4,8" fill="#cc7700" stroke="#7a4400" stroke-width="1.5"/><text x="14" y="18" text-anchor="middle" font-size="9" font-family="Arial" font-weight="bold" fill="white">REF</text></svg>',
+      terminal: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="12" fill="#1a6e1a" stroke="#0a3a0a" stroke-width="1.5"/><text x="14" y="18" text-anchor="middle" font-size="9" font-family="Arial" font-weight="bold" fill="white">TRM</text></svg>',
+      pumping_station: '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26"><rect x="2" y="2" width="22" height="22" rx="4" fill="#1a4499" stroke="#0a2255" stroke-width="1.5"/><text x="13" y="17" text-anchor="middle" font-size="9" font-family="Arial" font-weight="bold" fill="white">PS</text></svg>',
+      main_line_valve: '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26"><polygon points="13,1 25,13 13,25 1,13" fill="#aa2200" stroke="#661100" stroke-width="1.5"/><text x="13" y="17" text-anchor="middle" font-size="7" font-family="Arial" font-weight="bold" fill="white">MLV</text></svg>'
+    };
+
+    var NODE_LABELS = {
+      refinery: 'Refinery',
+      terminal: 'Terminal',
+      pumping_station: 'Pumping Station',
+      main_line_valve: 'Main Line Valve'
+    };
+
+    function makePipelineIcon(nodeType) {
+      var svg = PIPELINE_ICONS[nodeType] || PIPELINE_ICONS.main_line_valve;
+      var size = (nodeType === 'refinery' || nodeType === 'terminal') ? 28 : 26;
+      return L.divIcon({
+        html: svg,
+        className: '',
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2]
+      });
+    }
+
+    function buildPipelineTooltip(p) {
+      var label = NODE_LABELS[p.node_type] || p.node_type;
+      var html = '<div style="font-family:Arial,sans-serif;font-size:12px;min-width:200px;">';
+      html += '<div style="font-weight:bold;font-size:13px;margin-bottom:2px;">' + p.name + '</div>';
+      html += '<div style="color:#666;font-size:11px;margin-bottom:5px;">' + label + '</div>';
+      html += '<table style="border-collapse:collapse;width:100%;">';
+      if (p.node_type === 'pumping_station') {
+        html += '<tr><td style="padding:2px 8px 2px 0;color:#555;">Inlet Pressure</td><td style="text-align:right;font-weight:bold;">' + p.pressure_kpa.toLocaleString() + ' kPa</td></tr>';
+        html += '<tr><td style="padding:2px 8px 2px 0;color:#555;">Outlet Pressure</td><td style="text-align:right;font-weight:bold;">' + p.outlet_pressure_kpa.toLocaleString() + ' kPa</td></tr>';
+      } else {
+        html += '<tr><td style="padding:2px 8px 2px 0;color:#555;">Pressure</td><td style="text-align:right;font-weight:bold;">' + p.pressure_kpa.toLocaleString() + ' kPa</td></tr>';
+      }
+      html += '<tr><td style="padding:2px 8px 2px 0;color:#555;">Temperature</td><td style="text-align:right;font-weight:bold;">' + p.temperature_c + ' \u00b0C</td></tr>';
+      html += '<tr><td style="padding:2px 8px 2px 0;color:#555;">Flow Rate</td><td style="text-align:right;font-weight:bold;">' + p.flow_rate_m3h.toLocaleString() + ' m\u00b3/h</td></tr>';
+      html += '</table></div>';
+      return html;
+    }
+
+    function loadPipeline(url) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4 || xhr.status !== 200) { return; }
+        var data;
+        try { data = JSON.parse(xhr.responseText); } catch (e) { return; }
+        var i, f, coords, latlngs, j, lat, lng, marker;
+        for (i = 0; i < data.features.length; i++) {
+          f = data.features[i];
+          if (f.geometry.type === 'LineString') {
+            coords = f.geometry.coordinates;
+            latlngs = [];
+            for (j = 0; j < coords.length; j++) {
+              latlngs.push([coords[j][1], coords[j][0]]);
+            }
+            L.polyline(latlngs, {
+              color: '#2a2a5a',
+              weight: 3,
+              opacity: 0.85
+            }).addTo(map);
+          } else if (f.geometry.type === 'Point' && f.properties.type === 'pipeline_node') {
+            lat = f.geometry.coordinates[1];
+            lng = f.geometry.coordinates[0];
+            marker = L.marker([lat, lng], {
+              icon: makePipelineIcon(f.properties.node_type),
+              zIndexOffset: 500
+            });
+            marker.bindTooltip(buildPipelineTooltip(f.properties), {
+              sticky: false,
+              direction: 'top',
+              offset: [0, -14]
+            });
+            marker.addTo(map);
+          }
+        }
+      };
+      xhr.send();
+    }
+
+    loadPipeline('/data/pipeline.geojson');
   </script>
 </body>
 </html>
