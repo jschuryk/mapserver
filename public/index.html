@@ -406,15 +406,20 @@
     // -----------------------------------------------------------------------
     function loadScript(src, callback) {
       var s = document.createElement('script');
-      s.onload = callback;
+      var head = document.getElementsByTagName('head')[0];
+      s.onload = function () {
+        head.removeChild(s);
+        callback();
+      };
       s.onreadystatechange = function () {
         if (s.readyState === 'loaded' || s.readyState === 'complete') {
           s.onreadystatechange = null;
+          head.removeChild(s);
           callback();
         }
       };
       s.src = src;
-      document.getElementsByTagName('head')[0].appendChild(s);
+      head.appendChild(s);
     }
 
     // Land polygons — rendered below tiles so blue ocean background shows through

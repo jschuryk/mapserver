@@ -18,8 +18,8 @@ function download(filename, cb) {
 var COUNTRIES = { 'Canada': true, 'United States of America': true, 'Mexico': true };
 var ISO       = { 'CAN': true, 'USA': true, 'MEX': true };
 
-// State/province boundaries — filter by admin (country name)
-download('ne_10m_admin_1_states_provinces.geojson', function (err, raw) {
+// State/province boundaries — 50m resolution (adequate for zoom <=10, much smaller than 10m)
+download('ne_50m_admin_1_states_provinces.geojson', function (err, raw) {
   if (err) { console.error(err); process.exit(1); }
   var geojson = JSON.parse(raw);
   geojson.features = geojson.features.filter(function (f) {
@@ -45,8 +45,8 @@ download('ne_50m_land.geojson', function (err, raw) {
   console.log('Wrote land.geojson (' + geojson.features.length + ' features)');
 });
 
-// National boundaries — filter by ISO_A3
-download('ne_10m_admin_0_countries.geojson', function (err, raw) {
+// National boundaries — 50m resolution
+download('ne_50m_admin_0_countries.geojson', function (err, raw) {
   if (err) { console.error(err); process.exit(1); }
   var geojson = JSON.parse(raw);
   geojson.features = geojson.features.filter(function (f) {
