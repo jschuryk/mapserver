@@ -55,57 +55,19 @@
   <div id="map"></div>
   <div id="zoom-display">z4</div>
   <script src="lib/leaflet.js"></script>
-  <script src="lib/Leaflet.VectorGrid.bundled.js"></script>
   <script>
     // Set SERVER to the map server address when using this file locally (e.g. 'http://192.168.1.10:3000').
     // Leave empty ('') when this file is served directly from the map server.
-    // Note: data files (GeoJSON) are always loaded from relative paths — copy the data/ folder alongside this file.
     var SERVER = '';
 
-    // IE11 detection — caps maxZoom to 8 to stay within IE11's memory budget.
-    // window.MSInputMethodContext is IE11-only; document.documentMode rules out Edge.
-    var isIE11 = !!(window.MSInputMethodContext) && !!(document.documentMode);
-    var effectiveMaxZoom = isIE11 ? 8 : 10;
+    var map = L.map('map', { maxZoom: 10 }).setView([56.0, -96.0], 4);
 
-    var map = L.map('map', { maxZoom: effectiveMaxZoom }).setView([56.0, -96.0], 4);
-
-    // Land pane sits below the tile pane (z=200) so ocean background shows through
-    map.createPane('landPane');
-    map.getPane('landPane').style.zIndex = 150;
-
-    function roadStyle(properties) {
-      var c = properties.class;
-      var z = map.getZoom();
-      // ASM-style: grayscale hierarchy, weight carries more meaning than colour
-      if (z < 6) return { weight: 0, opacity: 0, fill: false };
-      if (c === 'motorway') return { color: '#a0a0a0', weight: 3.5, opacity: 1 };
-      if (c === 'trunk')    return { color: '#b4b4b4', weight: 2.5, opacity: 1 };
-      if (c === 'primary')  return { color: '#c4c4c4', weight: 2,   opacity: 1 };
-      return { color: '#cccccc', weight: 1, opacity: 0.8 };
-    }
-
-    L.vectorGrid.protobuf(SERVER + '/tiles/{z}/{x}/{y}.pbf?v=6', {
-      rendererFactory: L.canvas.tile,
-      maxZoom: effectiveMaxZoom,
-      minZoom: 4,
-      updateWhenZooming: false,
-      updateWhenIdle: true,
-      keepBuffer: 1,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      vectorTileLayerStyles: {
-        // Water: low-saturation blue-gray
-        water: {
-          fill: true, fillColor: '#9ab4bc', fillOpacity: 1, weight: 0
-        },
-        // Waterways: slightly deeper blue-gray stroke
-        waterway: {
-          color: '#7a9ea8', weight: 1.5, opacity: 0.85
-        },
-        transportation: roadStyle,
-        transportation_name: { weight: 0, fill: false },
-        place: { weight: 0, fill: false },
-        poi:   { weight: 0, fill: false }
-      }
+    // Raster tiles rendered server-side by TileServer GL — no client-side
+    // protobuf parsing, works in IE11 without memory issues.
+    L.tileLayer(SERVER + '/tiles/{z}/{x}/{y}.png', {
+      minZoom: 2,
+      maxZoom: 10,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
     // -----------------------------------------------------------------------
@@ -428,41 +390,23 @@
       head.appendChild(s);
     }
 
-    // IE11 (32-bit process, ~1.6GB memory ceiling): skip GeoJSON polygon layers
-    // entirely — Leaflet stores all coordinate arrays in JS heap regardless of
-    // renderer, and complex polygon data + tile parsing exceeds IE11's budget.
-    // Use land-gray CSS background instead; ocean loses distinction but map is functional.
-    if (isIE11) {
-      document.getElementById('map').style.background = '#b8b8b8';
-    } else {
-      // Land polygons — rendered below tiles so blue ocean background shows through.
-      loadScript(SERVER + '/data/land.js', function () {
-        if (typeof LAND_DATA === 'undefined') { return; }
-        L.geoJSON(LAND_DATA, {
-          pane: 'landPane',
-          renderer: L.canvas({ pane: 'landPane' }),
-          style: { fillColor: '#b8b8b8', fillOpacity: 1, weight: 0 }
-        }).addTo(map);
-      });
+    // State/province borders — subtle gray
+    loadScript(SERVER + '/data/provinces.js', function () {
+      if (typeof PROVINCES_DATA === 'undefined') { return; }
+      L.geoJSON(PROVINCES_DATA, {
+        renderer: L.canvas(),
+        style: { color: '#7a7a7a', weight: 0.75, fillOpacity: 0, opacity: 0.6 }
+      }).addTo(map);
+    });
 
-      // State/province borders — subtle gray
-      loadScript(SERVER + '/data/provinces.js', function () {
-        if (typeof PROVINCES_DATA === 'undefined') { return; }
-        L.geoJSON(PROVINCES_DATA, {
-          renderer: L.canvas(),
-          style: { color: '#7a7a7a', weight: 0.75, fillOpacity: 0, opacity: 0.6 }
-        }).addTo(map);
-      });
-
-      // National borders — slightly heavier and darker
-      loadScript(SERVER + '/data/countries.js', function () {
-        if (typeof COUNTRIES_DATA === 'undefined') { return; }
-        L.geoJSON(COUNTRIES_DATA, {
-          renderer: L.canvas(),
-          style: { color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7 }
-        }).addTo(map);
-      });
-    }
+    // National borders — slightly heavier and darker
+    loadScript(SERVER + '/data/countries.js', function () {
+      if (typeof COUNTRIES_DATA === 'undefined') { return; }
+      L.geoJSON(COUNTRIES_DATA, {
+        renderer: L.canvas(),
+        style: { color: '#444444', weight: 1.5, fillOpacity: 0, opacity: 0.7 }
+      }).addTo(map);
+    });
 
     // -----------------------------------------------------------------------
     // Pipeline layer — Pacific Heights Pipeline (Edmonton to Burnaby)

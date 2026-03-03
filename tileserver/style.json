@@ -1,0 +1,75 @@
+{
+  "version": 8,
+  "name": "ASM Basic",
+  "sources": {
+    "tiles": {
+      "type": "vector",
+      "url": "mbtiles://{tiles}"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#b8b8b8"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "tiles",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "#9ab4bc",
+        "fill-opacity": 1
+      }
+    },
+    {
+      "id": "waterway",
+      "type": "line",
+      "source": "tiles",
+      "source-layer": "waterway",
+      "paint": {
+        "line-color": "#7a9ea8",
+        "line-width": 1.5
+      }
+    },
+    {
+      "id": "road-primary",
+      "type": "line",
+      "source": "tiles",
+      "source-layer": "transportation",
+      "filter": ["==", "class", "primary"],
+      "minzoom": 6,
+      "paint": {
+        "line-color": "#c4c4c4",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "road-trunk",
+      "type": "line",
+      "source": "tiles",
+      "source-layer": "transportation",
+      "filter": ["==", "class", "trunk"],
+      "minzoom": 6,
+      "paint": {
+        "line-color": "#b4b4b4",
+        "line-width": 2.5
+      }
+    },
+    {
+      "id": "road-motorway",
+      "type": "line",
+      "source": "tiles",
+      "source-layer": "transportation",
+      "filter": ["==", "class", "motorway"],
+      "minzoom": 6,
+      "paint": {
+        "line-color": "#a0a0a0",
+        "line-width": 3.5
+      }
+    }
+  ]
+}
