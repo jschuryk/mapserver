@@ -488,11 +488,14 @@
       return html;
     }
 
-    loadScript(SERVER + '/data/pipeline.js', function () {
-      if (typeof PIPELINE_DATA === 'undefined') { return; }
+    // Layer group so renderPipeline() can clear and re-draw on each refresh
+    var pipelineLayer = L.layerGroup().addTo(map);
+
+    function renderPipeline(data) {
+      pipelineLayer.clearLayers();
       var i, f, coords, latlngs, j, lat, lng, marker;
-      for (i = 0; i < PIPELINE_DATA.features.length; i++) {
-        f = PIPELINE_DATA.features[i];
+      for (i = 0; i < data.features.length; i++) {
+        f = data.features[i];
         if (f.geometry.type === 'LineString') {
           coords = f.geometry.coordinates;
           latlngs = [];
@@ -503,7 +506,7 @@
             color: '#2a2a5a',
             weight: 3,
             opacity: 0.85
-          }).addTo(map);
+          }).addTo(pipelineLayer);
         } else if (f.geometry.type === 'Point' && f.properties.type === 'pipeline_node') {
           lat = f.geometry.coordinates[1];
           lng = f.geometry.coordinates[0];
@@ -516,10 +519,23 @@
             direction: 'top',
             offset: [0, -14]
           });
-          marker.addTo(map);
+          marker.addTo(pipelineLayer);
         }
       }
-    });
+    }
+
+    // Reload pipeline.js from server with a timestamp to bypass cache,
+    // then re-render. Called once on load and then every 60 seconds.
+    function refreshPipeline() {
+      loadScript(SERVER + '/data/pipeline.js?t=' + new Date().getTime(), function () {
+        if (typeof PIPELINE_DATA !== 'undefined') {
+          renderPipeline(PIPELINE_DATA);
+        }
+      });
+    }
+
+    refreshPipeline();
+    setInterval(refreshPipeline, 60000);
   </script>
 </body>
 </html>
